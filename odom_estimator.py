@@ -24,10 +24,7 @@ has_odom = False
 def callback_cmdvel(twist):
     global last_cmdvel
     last_cmdvel = twist
-def callback_odom(data):
-    global has_odom
-    has_odom = True
-    tgt = data.pose
+    
     quaternion = [tgt.pose.orientation.x, tgt.pose.orientation.y, tgt.pose.orientation.z, tgt.pose.orientation.w]
     euler = tf.transformations.euler_from_quaternion(quaternion)
     roll = euler[0]
@@ -37,6 +34,15 @@ def callback_odom(data):
     estimated_orientation = Vector3(roll, pitch, yaw)
 def my_callback(event):
     try:
+        transf = tfBuffer.lookup_transform(BASE_FRAME, "map", rospy.Time(),timeout=rospy.Duration(2))
+        rotVec = PoseStamped()
+        rotVec.header.frame_id="map"
+        rotVec.pose.orientation.w = 1.0
+        rotVec = tf2_geometry_msgs.do_transform_pose(rotVec, transf)
+        quaternion = [rotVec.pose.orientation.x, rotVec.pose.orientation.y, rotVec.pose.orientation.z, rotVec.pose.orientation.w]
+        euler = tf.transformations.euler_from_quaternion(quaternion)
+        yaw = euler[2]
+        estimated_orientation.z = yaw
         travel_x = last_cmdvel.linear.x * UPDATE_PERIOD
         travel_y = last_cmdvel.linear.y * UPDATE_PERIOD
         travel_x = (travel_x * cos(estimated_orientation.z) + travel_y * sin(estimated_orientation.z));
@@ -66,5 +72,4 @@ odom_pub = rospy.Publisher("/estimator/odom", Odometry, queue_size=3)
 r = rospy.Rate(1.0/UPDATE_PERIOD)
 rospy.Timer(rospy.Duration(UPDATE_PERIOD), my_callback)
 rospy.Subscriber("/cmd_vel", Twist, callback_cmdvel)
-rospy.Subscriber("/odom", Odometry, callback_odom)
 rospy.spin()
