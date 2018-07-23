@@ -4,7 +4,7 @@ from math import sin, cos, pi
 import rospy
 import tf
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3, Vector3Stamped
+from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion, Twist, Vector3, Vector3Stamped
 import struct
 import tf2_ros
 import tf2_geometry_msgs
@@ -25,13 +25,6 @@ def callback_cmdvel(twist):
     global last_cmdvel
     last_cmdvel = twist
     
-    quaternion = [tgt.pose.orientation.x, tgt.pose.orientation.y, tgt.pose.orientation.z, tgt.pose.orientation.w]
-    euler = tf.transformations.euler_from_quaternion(quaternion)
-    roll = euler[0]
-    pitch = euler[1]
-    yaw = euler[2]
-    global estimated_orientation
-    estimated_orientation = Vector3(roll, pitch, yaw)
 def my_callback(event):
     try:
         transf = tfBuffer.lookup_transform(BASE_FRAME, "map", rospy.Time(),timeout=rospy.Duration(2))
