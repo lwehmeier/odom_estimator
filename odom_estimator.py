@@ -27,7 +27,7 @@ def callback_cmdvel(twist):
     
 def my_callback(event):
     try:
-        transf = tfBuffer.lookup_transform(BASE_FRAME, "map", rospy.Time(),timeout=rospy.Duration(2))
+        transf = tfBuffer.lookup_transform("map", BASE_FRAME, rospy.Time(),timeout=rospy.Duration(2))
         rotVec = PoseStamped()
         rotVec.header.frame_id="map"
         rotVec.pose.orientation.w = 1.0
