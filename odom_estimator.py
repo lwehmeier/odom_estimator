@@ -10,7 +10,7 @@ import tf2_ros
 import tf2_geometry_msgs
 BASE_FRAME= "base_footprint"
 ODOM_FRAME = "odom"
-UPDATE_PERIOD = 0.1
+UPDATE_PERIOD = 0.5
 global odom_pub
 global estimated_position
 global estimated_orientation
@@ -21,9 +21,9 @@ global last_cmdvel
 last_cmdvel = Twist()
 global has_odom
 has_odom = False
-def callback_cmdvel(twist):
+def callback_cmdvel(vector3):
     global last_cmdvel
-    last_cmdvel = twist
+    last_cmdvel = vector3
     
 def my_callback(event):
     try:
@@ -36,13 +36,13 @@ def my_callback(event):
         euler = tf.transformations.euler_from_quaternion(quaternion)
         yaw = euler[2]
         estimated_orientation.z = yaw
-        travel_x = last_cmdvel.linear.x * UPDATE_PERIOD
-        travel_y = last_cmdvel.linear.y * UPDATE_PERIOD
+        travel_x = last_cmdvel.x * UPDATE_PERIOD
+        travel_y = last_cmdvel.y * UPDATE_PERIOD
         travel_x = (travel_x * cos(estimated_orientation.z) + travel_y * sin(estimated_orientation.z));
         travel_y = (travel_x * sin(estimated_orientation.z) + travel_y * cos(estimated_orientation.z));
         estimated_position.x = estimated_position.x + travel_x/2
         estimated_position.y = estimated_position.y + travel_y/2
-        omega = last_cmdvel.angular.z * UPDATE_PERIOD
+        omega = last_cmdvel.z * UPDATE_PERIOD
         if not has_odom:
             estimated_orientation.z += omega
         
@@ -64,5 +64,5 @@ listener = tf2_ros.TransformListener(tfBuffer)
 odom_pub = rospy.Publisher("/estimator/odom", Odometry, queue_size=3)
 r = rospy.Rate(1.0/UPDATE_PERIOD)
 rospy.Timer(rospy.Duration(UPDATE_PERIOD), my_callback)
-rospy.Subscriber("/cmd_vel", Twist, callback_cmdvel)
+rospy.Subscriber("/platform/combined", Vector3, callback_cmdvel)
 rospy.spin()
