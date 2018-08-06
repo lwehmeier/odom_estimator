@@ -18,7 +18,7 @@ estimated_position = Vector3()
 estimated_orientation = Vector3()
 global tfBuffer
 global last_cmdvel
-last_cmdvel = Twist()
+last_cmdvel = Vector3()
 global has_odom
 has_odom = False
 def callback_cmdvel(vector3):

@@ -1,7 +1,7 @@
 <!-- Starts up everything needed to run the example listener/talker Python nodes. -->
 
 <launch>
-  <node pkg="odom_estimator" type="odom_estimator.py" name="odom_estimator">
+  <node pkg="odom_estimator" type="odom_estimator.exe" name="odom_estimator">
     <param name="rate" value="25"/>
   </node>
 </launch>
